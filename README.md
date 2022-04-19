@@ -1,6 +1,6 @@
 Set up a cluster, for example using [proxmox-k8s](https://github.com/alexpdp7/proxmox-k8s).
 
-Install [tobs](https://github.com/timescale/tobs):
+Install [tobs](https://github.com/timescale/tobs) (see [this known issue](https://github.com/timescale/tobs/issues/296)):
 
 ```
 $ tobs install --tracing -n tobs
