@@ -1,4 +1,4 @@
-Set up a cluster, for example using https://github.com/alexpdp7/proxmox-k8s .
+Set up a cluster, for example using [proxmox-k8s](https://github.com/alexpdp7/proxmox-k8s).
 
 Install [tobs](https://github.com/timescale/tobs):
 
