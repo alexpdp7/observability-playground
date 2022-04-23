@@ -6,6 +6,57 @@ Install [tobs](https://github.com/timescale/tobs) (see [this known issue](https:
 $ tobs install --tracing -n tobs
 ```
 
+Due to this [issue](https://github.com/timescale/tobs/issues/296), the OpenTelemetry collector is not deployed for me.
+Use the following command to deploy it.
+(Note that this assumes you used `-n tobs` above.)
+
+```
+$ kubectl apply -f - <<EOF
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: otel
+  namespace: tobs
+spec:
+  config: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+          http:
+
+    exporters:
+      otlp:
+        endpoint: "tobs-promscale-connector:9202"
+        tls:
+          insecure: true
+        sending_queue:
+          queue_size: 1000000
+        timeout: 10s
+      prometheusremotewrite:
+        endpoint: "tobs-promscale-connector:9201/write"
+        tls:
+          insecure: true
+
+    processors:
+      batch:
+        send_batch_size: 4000
+        send_batch_max_size: 4000
+        timeout: 10s
+
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          exporters: [otlp]
+          processors: [batch]
+        metrics:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [prometheusremotewrite]
+EOF
+```
+
 Expose Grafana:
 
 ```
@@ -23,14 +74,18 @@ Visit https://grafana.<ingress_domain>, as `admin` using the password from the p
 Expose Promscale GRPC OpenTelemetry endpoint (if using proxmox-k8s):
 
 ```
-$ kubectl expose -n tobs service tobs-promscale-connector --port=9202 --type=LoadBalancer --name=otel-grpc --load-balancer-ip=0.0.0.0
-$ kubectl get svc -n tobs otel-grpc  # to get the actual port exposed
+$ kubectl expose service -n tobs otel-collector --type=LoadBalancer --name=otel-collector-external --load-balancer-ip=0.0.0.0
+```
+
+Run the following command to find out in which port has the `otlp-grpc` port has end up being exposed:
+
+```
+$ kubectl get -n tobs svc otel-collector otel-collector-external -o yaml
 ```
 
 Then you can try running:
 
 ```
 $ cd nagios-otel
-$ OTEL_EXPORTER_OTLP_INSECURE=true OTEL_EXPORTER_OTLP_ENDPOINT=otel-grpc.tobs.<k8s_domain>:<lb_port> poetry run python nagios-otel.py
-ERROR:opentelemetry.exporter.otlp.proto.grpc.exporter:Failed to export span batch, error code: StatusCode.UNIMPLEMENTED
+$ OTEL_EXPORTER_OTLP_INSECURE=true OTEL_EXPORTER_OTLP_ENDPOINT=otel-collector-external.tobs.<load_balancer_domain>:<port> poetry run python nagios-otel.py
 ```
