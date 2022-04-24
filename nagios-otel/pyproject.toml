@@ -6,12 +6,13 @@ authors = ["alex <alex@pdp7.net>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-opentelemetry-api = "^1.11.0"
-opentelemetry-sdk = "^1.11.0"
-opentelemetry-exporter-otlp-proto-grpc = "^1.11.0"
+opentelemetry-api = "1.11.1"
+opentelemetry-sdk = "1.11.1"
+opentelemetry-exporter-otlp-proto-grpc = "1.11.1"
 
 [tool.poetry.dev-dependencies]
 ipython = "^8.2.0"
+ipdb = "^0.13.9"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

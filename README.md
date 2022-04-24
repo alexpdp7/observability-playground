@@ -9,6 +9,7 @@ $ tobs install --tracing -n tobs
 Due to this [issue](https://github.com/timescale/tobs/issues/296), the OpenTelemetry collector is not deployed for me.
 Use the following command to deploy it.
 (Note that this assumes you used `-n tobs` above.)
+(Also, this configuration has debugging and no batching, so it's probably not valid for production.)
 
 ```
 $ kubectl apply -f - <<EOF
@@ -34,9 +35,11 @@ spec:
           queue_size: 1000000
         timeout: 10s
       prometheusremotewrite:
-        endpoint: "tobs-promscale-connector:9201/write"
+        endpoint: "http://tobs-promscale-connector:9201/write"
         tls:
           insecure: true
+      logging:
+        loglevel: debug
 
     processors:
       batch:
@@ -45,15 +48,17 @@ spec:
         timeout: 10s
 
     service:
+      telemetry:
+        logs:
+          level: "debug"
+
       pipelines:
         traces:
           receivers: [otlp]
-          exporters: [otlp]
-          processors: [batch]
+          exporters: [otlp,logging]
         metrics:
           receivers: [otlp]
-          processors: [batch]
-          exporters: [prometheusremotewrite]
+          exporters: [prometheusremotewrite,logging]
 EOF
 ```
 
@@ -87,5 +92,7 @@ Then you can try running:
 
 ```
 $ cd nagios-otel
-$ OTEL_EXPORTER_OTLP_INSECURE=true OTEL_EXPORTER_OTLP_ENDPOINT=otel-collector-external.tobs.<load_balancer_domain>:<port> poetry run python nagios-otel.py
+$ OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector-external.tobs.<k8s_lb_domain>:<port_from_above> poetry run python nagios-otel.py 
 ```
+
+A `foo` metric should appear in Grafana. Also if you use the `tobs` command to forward Jaeger, you should see a trace.
