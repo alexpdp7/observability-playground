@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "nagios-otel"
+name = "tester"
 version = "0.1.0"
 description = ""
 authors = ["alex <alex@pdp7.net>"]

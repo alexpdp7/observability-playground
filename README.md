@@ -91,8 +91,8 @@ $ kubectl get -n tobs svc otel-collector otel-collector-external -o yaml
 Then you can try running:
 
 ```
-$ cd nagios-otel
-$ OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector-external.tobs.<k8s_lb_domain>:<port_from_above> poetry run python nagios-otel.py 
+$ cd tester
+$ OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector-external.tobs.<k8s_lb_domain>:<port_from_above> poetry run python tester.py 
 ```
 
 A `foo` metric should appear in Grafana. Also if you use the `tobs` command to forward Jaeger, you should see a trace.
