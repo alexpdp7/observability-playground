@@ -2,13 +2,24 @@ Set up a cluster, for example using [proxmox-k8s](https://github.com/alexpdp7/pr
 
 Install [tobs](https://github.com/timescale/tobs).
 
-If you use proxmox-k8s or some Kubernetes cluster that has DNS issues with busybox uclibc containers, follow [this procedure](https://github.com/timescale/tobs/issues/371#issuecomment-1133185163) to install tobs.
+There are some known issues with installing tobs:
 
-If not, then run:
+* tobs uses busybox:1.28 that uses uclibc, that has DNS issues.
+  [On proxmox-k8s, DNS resolution does not work well, breaking tobs install](https://github.com/alexpdp7/proxmox-k8s/issues/1).
+* [One of the images used by tobs is huge, causing timeouts during installation](https://github.com/timescale/tobs/issues/377)
+
+If those are solved, then you may be able to install tobs by running `tobs install -n tobs`.
+However, I recommend installing tobs using Helm and a patched fork:
 
 ```
-$ tobs install -n tobs
+$ git clone git@github.com:alexpdp7/tobs.git
+$ cd tobs/chart
+$ rm Chart.lock
+$ helm dependency build
+$ helm install --create-namespace -n tobs --wait tobs . --debug --timeout=15m
 ```
+
+(note the timeout parameter to prevent the issue with the huge image.)
 
 Expose Grafana:
 
