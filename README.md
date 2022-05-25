@@ -6,6 +6,7 @@ There are some known issues with installing tobs:
 
 * tobs uses busybox:1.28 that uses uclibc, that has DNS issues.
   [On proxmox-k8s, DNS resolution does not work well, breaking tobs install](https://github.com/alexpdp7/proxmox-k8s/issues/1).
+  [This issue might remove the usage of busybox:1.28](https://github.com/timescale/tobs/issues/338).
 * [One of the images used by tobs is huge, causing timeouts during installation](https://github.com/timescale/tobs/issues/377)
 
 If those are solved, then you may be able to install tobs by running `tobs install -n tobs`.
