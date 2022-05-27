@@ -36,8 +36,6 @@ $ tobs -n tobs grafana get-password
 
 Visit https://grafana.<ingress_domain>, as `admin` using the password from the previous command.
 
-Patch the collector, see https://github.com/timescale/tobs/issues/379 .
-
 Expose Promscale GRPC OpenTelemetry endpoint (if using proxmox-k8s):
 
 ```
